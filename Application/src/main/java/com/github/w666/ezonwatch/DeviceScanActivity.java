@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -50,6 +52,8 @@ public class DeviceScanActivity extends ListActivity {
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
+
+    private static final String[] ezonDevicesPrefixes = {"E1_","E1S_","F1_","F2_","F3_","S2_","S3_","S1_","EZON SPORT","BDE_WEIXIN_TTM","G1_","G2_","G3_","F1_","F2_","F3_", "E1_","E1S_","S1_","S2_","S3_"};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -200,7 +204,15 @@ public class DeviceScanActivity extends ListActivity {
 
         public void addDevice(BluetoothDevice device) {
             if(!mLeDevices.contains(device)) {
-                mLeDevices.add(device);
+                if (device.getName() != null) {
+                    for (String prefix:ezonDevicesPrefixes) {
+                        if (device.getName().startsWith(prefix)) {
+                            mLeDevices.add(device);
+                            return;
+                        }
+                    }
+                }
+                //mLeDevices.add(device);
             }
         }
 
@@ -243,6 +255,7 @@ public class DeviceScanActivity extends ListActivity {
 
             BluetoothDevice device = mLeDevices.get(i);
             final String deviceName = device.getName();
+
             if (deviceName != null && deviceName.length() > 0)
                 viewHolder.deviceName.setText(deviceName);
             else
