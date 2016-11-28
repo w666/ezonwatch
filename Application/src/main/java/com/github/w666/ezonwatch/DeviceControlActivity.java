@@ -270,47 +270,7 @@ DeviceControlActivity extends Activity {
         d.show();
     }
 
-    // If a given GATT characteristic is selected, check for supported features.  This sample
-    // demonstrates 'Read' and 'Notify' features.  See
-    // http://d.android.com/reference/android/bluetooth/BluetoothGatt.html for the complete
-    // list of supported characteristic features.
-    private final ExpandableListView.OnChildClickListener servicesListClickListner =
-            new ExpandableListView.OnChildClickListener() {
-                @Override
-                public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
-                                            int childPosition, long id) {
-                    if (mGattCharacteristics != null) {
-                        final BluetoothGattCharacteristic characteristic =
-                                mGattCharacteristics.get(groupPosition).get(childPosition);
-                        final int charaProp = characteristic.getProperties();
-                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
-                            // If there is an active notification on a characteristic, clear
-                            // it first so it doesn't update the data field on the user interface.
-                            if (mNotifyCharacteristic != null) {
-                                mBluetoothLeService.setCharacteristicNotification(
-                                        mNotifyCharacteristic, false);
-                                mNotifyCharacteristic = null;
-                            }
-                            mBluetoothLeService.readCharacteristic(characteristic);
-                        }
-                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
-                            mNotifyCharacteristic = characteristic;
-                            mBluetoothLeService.setCharacteristicNotification(
-                                    characteristic, true);
-                        }
-                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) > 0) {
-                            mNotifyCharacteristic = characteristic;
-                            mBluetoothLeService.setCharacteristicNotification(
-                                    characteristic, true);
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-    };
-
     private void clearUI() {
-        mGattServicesList.setAdapter((SimpleExpandableListAdapter) null);
         mDataField.setText(R.string.no_data);
     }
 
@@ -320,15 +280,11 @@ DeviceControlActivity extends Activity {
         setContentView(R.layout.gatt_services_characteristics);
 
         final Intent intent = getIntent();
-        //mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
-        //mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
         mDeviceName = Preferences.readDeviceName(getApplicationContext());
         mDeviceAddress = Preferences.readDeviceAddress(getApplicationContext());
 
         // Sets up UI references.
         ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
-        mGattServicesList = (ExpandableListView) findViewById(R.id.gatt_services_list);
-        mGattServicesList.setOnChildClickListener(servicesListClickListner);
         mConnectionState = (TextView) findViewById(R.id.connection_state);
         mDataField = (TextView) findViewById(R.id.data_value);
 
@@ -556,17 +512,12 @@ DeviceControlActivity extends Activity {
             final boolean result = mBluetoothLeService.connect(mDeviceAddress);
             Log.d(TAG, "Connect request result=" + result);
         }
-        // Actually set it in response to ACTION_PAIRING_REQUEST.
-        final IntentFilter pairingRequestFilter = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
-        pairingRequestFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY - 1);
-        //registerReceiver(mPairingRequestRecevier, pairingRequestFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
-        //unregisterReceiver(mPairingRequestRecevier);
     }
 
     @Override
@@ -628,9 +579,6 @@ DeviceControlActivity extends Activity {
         String uuid = null;
         String unknownServiceString = getResources().getString(R.string.unknown_service);
         String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
-        ArrayList<HashMap<String, String>> gattServiceData = new ArrayList<HashMap<String, String>>();
-        ArrayList<ArrayList<HashMap<String, String>>> gattCharacteristicData
-                = new ArrayList<ArrayList<HashMap<String, String>>>();
         mGattCharacteristics = new ArrayList<ArrayList<BluetoothGattCharacteristic>>();
 
         // Loops through available GATT Services.
@@ -640,7 +588,6 @@ DeviceControlActivity extends Activity {
             currentServiceData.put(
                     LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
             currentServiceData.put(LIST_UUID, uuid);
-            gattServiceData.add(currentServiceData);
 
             ArrayList<HashMap<String, String>> gattCharacteristicGroupData =
                     new ArrayList<HashMap<String, String>>();
@@ -664,21 +611,7 @@ DeviceControlActivity extends Activity {
                 }
             }
             mGattCharacteristics.add(charas);
-            gattCharacteristicData.add(gattCharacteristicGroupData);
         }
-
-        SimpleExpandableListAdapter gattServiceAdapter = new SimpleExpandableListAdapter(
-                this,
-                gattServiceData,
-                android.R.layout.simple_expandable_list_item_2,
-                new String[] {LIST_NAME, LIST_UUID},
-                new int[] { android.R.id.text1, android.R.id.text2 },
-                gattCharacteristicData,
-                android.R.layout.simple_expandable_list_item_2,
-                new String[] {LIST_NAME, LIST_UUID},
-                new int[] { android.R.id.text1, android.R.id.text2 }
-        );
-        mGattServicesList.setAdapter(gattServiceAdapter);
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {
