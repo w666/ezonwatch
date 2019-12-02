@@ -16,6 +16,7 @@
 
 package com.github.w666.ezonwatch;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
@@ -26,7 +27,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.res.TypedArrayUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -80,6 +80,8 @@ public class DeviceScanActivity extends ListActivity {
             finish();
             return;
         }
+
+        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
 
         if (!(Preferences.readDeviceAddress(getApplicationContext()) == null) &&
                 !(Preferences.readDeviceName(getApplicationContext()) == null)) {

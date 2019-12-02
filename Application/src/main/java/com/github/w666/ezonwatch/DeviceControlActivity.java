@@ -17,6 +17,7 @@
 package com.github.w666.ezonwatch;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
@@ -26,6 +27,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -376,8 +378,22 @@ DeviceControlActivity extends Activity {
                         break;
                     }
                     case R.id.disable_alarm: {
-                        byte[] data = hexStringToByteArray("414301000044");
-                        writeMain(data);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DeviceControlActivity.this);
+                        builder.setMessage("Disable alarm?")
+                                .setCancelable(true)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        byte[] data = hexStringToByteArray("414301000044");
+                                        writeMain(data);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                        });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                         break;
                     }
                     case R.id.sync_time: {
@@ -386,50 +402,120 @@ DeviceControlActivity extends Activity {
                         just text   | year  |month|day |hour|min |sec | 12/24H | EOM  | nothing, just zeros
                          T  I  M  E | 2016  | 09  | 29 | 15 | 04 | 43 | 12H    |      |
                         */
-                        String timeStr = "TIME";
-                        byte[] bytes = timeStr.getBytes(Charset.forName("US-ASCII"));
-                        Date date = Calendar.getInstance().getTime();
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(date);
-                        byte[] datetime = {(byte) (cal.get(Calendar.YEAR) >> 8), (byte) cal.get(Calendar.YEAR), (byte) (cal.get(Calendar.MONTH)+1), (byte) cal.get(Calendar.DAY_OF_MONTH),
-                                (byte) cal.get(Calendar.HOUR_OF_DAY), (byte) cal.get(Calendar.MINUTE), (byte) cal.get(Calendar.SECOND), (byte) 0x01, (byte) 0xd0, (byte) 0x02};
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-                        try {
-                            outputStream.write( bytes );
-                            outputStream.write( datetime );
-                            //outputStream.write( hexStringToByteArray("000000000000") );
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        byte data[] = outputStream.toByteArray( );
-                        writeMain(data);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DeviceControlActivity.this);
+                        builder.setMessage("Sync time?")
+                                .setCancelable(true)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        String timeStr = "TIME";
+                                        byte[] bytes = timeStr.getBytes(Charset.forName("US-ASCII"));
+                                        Date date = Calendar.getInstance().getTime();
+                                        Calendar cal = Calendar.getInstance();
+                                        cal.setTime(date);
+                                        byte[] datetime = {(byte) (cal.get(Calendar.YEAR) >> 8), (byte) cal.get(Calendar.YEAR), (byte) (cal.get(Calendar.MONTH)+1), (byte) cal.get(Calendar.DAY_OF_MONTH),
+                                                (byte) cal.get(Calendar.HOUR_OF_DAY), (byte) cal.get(Calendar.MINUTE), (byte) cal.get(Calendar.SECOND), (byte) 0x01, (byte) 0xd0, (byte) 0x02};
+                                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+                                        try {
+                                            outputStream.write( bytes );
+                                            outputStream.write( datetime );
+                                            //outputStream.write( hexStringToByteArray("000000000000") );
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        byte data[] = outputStream.toByteArray( );
+                                        writeMain(data);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                         break;
                     }
                     case R.id.request_pin: {
-                        byte[] data = hexStringToByteArray("430003090608");
-                        writeMain(data);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DeviceControlActivity.this);
+                        builder.setMessage("Request pin?")
+                                .setCancelable(true)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        byte[] data = hexStringToByteArray("430003090608");
+                                        writeMain(data);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                        });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                         break;
                     }
                     case R.id.call_reminder: {
-                        byte[] data = hexStringToByteArray("4e00455a4f4e4950484f4e45");
-                        writeMain(data);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DeviceControlActivity.this);
+                        builder.setMessage("Display call reminder on the watch?")
+                                .setCancelable(true)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        byte[] data = hexStringToByteArray("4e00455a4f4e4950484f4e45");
+                                        writeMain(data);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                         break;
                     }
                     case R.id.connect: {
                         // yes, it really checks all those zeros
-                        byte[] data = hexStringToByteArray("4300000000000000000000000000000000000000");
-                        writeMain(data);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DeviceControlActivity.this);
+                        builder.setMessage("Connect again?")
+                                .setCancelable(true)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        byte[] data = hexStringToByteArray("4300000000000000000000000000000000000000");
+                                        writeMain(data);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                         break;
                     }
                     case R.id.get_steps: {
                         // Get list of available files
                         //byte[] data = hexStringToByteArray("4301000000000000000000000000000000000000");
-                        Date date = Calendar.getInstance().getTime();
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(date);
-                        // Get stepsArr data for Today
-                        byte[] data = {(byte) 0x43, (byte) 0x02, (byte) (cal.get(Calendar.YEAR)-2000), (byte) (cal.get(Calendar.MONTH)+1),(byte) cal.get(Calendar.DAY_OF_MONTH), (byte) 0xd0, (byte) 0x02};
-                        writeMain(data);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DeviceControlActivity.this);
+                        builder.setMessage("Get steps?")
+                                .setCancelable(true)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Date date = Calendar.getInstance().getTime();
+                                        Calendar cal = Calendar.getInstance();
+                                        cal.setTime(date);
+                                        // Get stepsArr data for Today
+                                        byte[] data = {(byte) 0x43, (byte) 0x02, (byte) (cal.get(Calendar.YEAR)-2000), (byte) (cal.get(Calendar.MONTH)+1),(byte) cal.get(Calendar.DAY_OF_MONTH), (byte) 0xd0, (byte) 0x02};
+                                        writeMain(data);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                         break;
                     }
                     case R.id.set_target: {
@@ -480,9 +566,23 @@ DeviceControlActivity extends Activity {
                         break;
                     }
                     case R.id.disable_target: {
-                        String timeStr = "STARGETD";
-                        byte[] data = timeStr.getBytes(Charset.forName("US-ASCII"));
-                        writeMain(data);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DeviceControlActivity.this);
+                        builder.setMessage("Disable Target?")
+                                .setCancelable(true)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        String timeStr = "STARGETD";
+                                        byte[] data = timeStr.getBytes(Charset.forName("US-ASCII"));
+                                        writeMain(data);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                         break;
                     }
                 }
